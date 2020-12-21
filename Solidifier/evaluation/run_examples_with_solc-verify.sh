@@ -18,7 +18,7 @@ declare -a arr_azure=(
 for i in "${arr_azure[@]}"
 do
    echo "################### Executing time timeout 300 $i #######################"
-   eval "time timeout 300 $i"
+   eval "time (timeout -s 9 300 $i)"
    ret_code=$?
    if [ "$ret_code" = "124" ]; then
         echo "######## Timeout ########"
@@ -42,7 +42,7 @@ declare -a arr_azure_fixed=(
 for i in "${arr_azure_fixed[@]}"
 do
    echo "################### Executing time timeout 300 $i #######################"
-   eval "time timeout 300 $i"
+   eval "time (timeout -s 9 300 $i)"
    ret_code=$?
    if [ "$ret_code" = "124" ]; then
       echo "######## Timeout ########"
@@ -65,7 +65,7 @@ declare -a arr_others=(
 for i in "${arr_others[@]}"
 do
    echo "################### Executing time timeout 300 $i #######################"
-   eval "time timeout 300 $i"
+   eval "time (timeout -s 9 300 $i)"
    ret_code=$?
    if [ "$ret_code" = "124" ]; then
       echo "######## Timeout ########"

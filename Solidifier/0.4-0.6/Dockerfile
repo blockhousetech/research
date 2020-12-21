@@ -3,7 +3,6 @@ FROM ubuntu:18.04
 RUN mkdir /scripts
 
 #INSTALL Solidifier
-
 RUN apt-get update
 RUN apt-get install -y wget unzip python g++ gnupg ca-certificates lsb-core sudo
 RUN echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | tee /etc/apt/sources.list.d/mono-official-stable.list
@@ -41,42 +40,10 @@ RUN echo '#!/bin/bash\n' > /scripts/corral
 RUN echo 'mono /corral-1.0.1/bin/Release/corral.exe $@' >> /scripts/corral
 RUN chmod +x /scripts/corral
 
-## INSTALL SOLC-VERIFY
-#### Boogie install
-RUN apt-get update
-RUN apt-get install -y git
-RUN git clone https://github.com/boogie-org/boogie.git
-RUN cd boogie && git checkout 9e74c3271f430adb958908400c6f6fce5b59000a && wget https://nuget.org/nuget.exe && mono ./nuget.exe restore Source/Boogie.sln && xbuild Source/Boogie.sln
-
-#### solc-verify itself
-RUN apt install python3-pip -y
-RUN pip3 install psutil
-RUN git clone https://github.com/SRI-CSL/solidity.git
-RUN cd solidity && git checkout v0.5.16-solc-verify && ./scripts/install_deps.sh && mkdir build && cd build/ && cmake -DBOOGIE_BIN="/boogie/Binaries/" .. && make
-RUN ln -s /z3-Z3-4.8.5/build/z3 /usr/local/bin/z3
-
-## INSTALL VERISOL
-RUN wget -q https://packages.microsoft.com/config/ubuntu/19.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-RUN dpkg -i packages-microsoft-prod.deb
-RUN apt-get update
-RUN apt-get install apt-transport-https -y
-RUN apt-get update
-RUN apt-get install dotnet-sdk-2.2 -y
-RUN dotnet tool install VeriSol --version 0.1.1-alpha --global
-RUN ~/.dotnet/tools/VeriSol C.sol C; exit 0 # First run install z3, boogie and corral for it
-
-## INSTALL MYTHRIL
-RUN apt-get install libssl-dev -y
-RUN pip3 install -Iv mythril==0.22.1
-
 ENV PATH=/scripts:${PATH}
 ENV SOLC=/solc-static-linux-0.5.17
 
 COPY Solidifier /scripts
 COPY examples /examples
-COPY examples_0.5.10/ /examples_0.5.10
 
 COPY run_examples.sh /
-COPY run_examples_with_solc-verify.sh /
-COPY run_examples_with_verisol.sh /
-COPY run_examples_with_mythril.sh /

@@ -1,4 +1,4 @@
-pragma solidity >=0.4.25 <0.5.16;
+pragma solidity >=0.4.25 <0.6.0;
 
 contract Wallet {
 
@@ -48,12 +48,10 @@ contract Wallet {
 		// spec var
         uint old_balance = accounts[msg.sender].balance;
 
-		accounts[msg.sender].balance =
-			accounts[msg.sender].balance + msg.value;
-
-		// Verification.CexPrintui(old_balance);
-		// Verification.CexPrintui(msg.value);
-		// Verification.CexPrintui(msg.value + old_balance);
+		Account memory account_mem;
+        account_mem = accounts[msg.sender];
+        account_mem.balance = account_mem.balance + msg.value;
+        accounts[msg.sender] = account_mem;
 
        assert(old_balance <= old_balance + msg.value);
        assert(accounts[msg.sender].balance == old_balance + msg.value);
@@ -69,12 +67,11 @@ contract Wallet {
 		// spec var
         uint old_balance = accounts[msg.sender].balance;
 
-		accounts[msg.sender].balance = accounts[msg.sender].balance - value;
+		Account storage account_stor = accounts[msg.sender];
+        Account memory account_mem = account_stor;
+        account_mem.balance = account_mem.balance - value;
+        accounts[msg.sender] = account_mem;
 		msg.sender.transfer(value);
-
-		// Verification.CexPrintui(old_balance);
-        // Verification.CexPrintui(value);
-        // Verification.CexPrintui(accounts[msg.sender].balance);
 
 		assert(old_balance >= old_balance - value);
         assert(accounts[msg.sender].balance == old_balance - value);

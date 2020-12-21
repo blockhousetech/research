@@ -1,4 +1,4 @@
-pragma solidity >=0.4.25 <0.5.16;
+pragma solidity >=0.4.25 <0.6.0;
 
 
 contract Wallet {
@@ -11,7 +11,7 @@ contract Wallet {
 
 	struct Account {
 		uint id;
-		uint bal;
+		uint balance;
 		Status status;
 	}
 
@@ -25,20 +25,20 @@ contract Wallet {
 		accounts[msg.sender].status = Status.Open;
 
 		assert(accounts[msg.sender].status == Status.Open);
-		assert(accounts[msg.sender].bal == 0);
+		assert(accounts[msg.sender].balance == 0);
 	}
 
 	function close () public {
 		require(accounts[msg.sender].status == Status.Open);
-		require(accounts[msg.sender].bal == 0);
+		require(accounts[msg.sender].balance == 0);
 
 		assert(accounts[msg.sender].status == Status.Open);
-       assert(accounts[msg.sender].bal == 0);
+       assert(accounts[msg.sender].balance == 0);
 
 		accounts[msg.sender].status = Status.Closed;
 
 		assert(accounts[msg.sender].status == Status.Closed);
-       assert(accounts[msg.sender].bal == 0);
+       assert(accounts[msg.sender].balance == 0);
 	}
 
 	function deposit () payable public {
@@ -47,42 +47,39 @@ contract Wallet {
 		assert(accounts[msg.sender].status == Status.Open);
 
 		// spec var
-        uint old_balance = accounts[msg.sender].bal;
+        uint old_balance = accounts[msg.sender].balance;
 
-        require(accounts[msg.sender].bal <= accounts[msg.sender].bal + msg.value);
+        require(accounts[msg.sender].balance <= accounts[msg.sender].balance + msg.value);
 
-		accounts[msg.sender].bal =
-			accounts[msg.sender].bal + msg.value;
-
-		// Verification.CexPrintui(old_balance);
-		// Verification.CexPrintui(msg.value);
-		// Verification.CexPrintui(msg.value + old_balance);
+		Account memory account_mem;
+        account_mem = accounts[msg.sender];
+        account_mem.balance = account_mem.balance + msg.value;
+        accounts[msg.sender] = account_mem;
 
        assert(old_balance <= old_balance + msg.value);
-       assert(accounts[msg.sender].bal == old_balance + msg.value);
+       assert(accounts[msg.sender].balance == old_balance + msg.value);
        assert(accounts[msg.sender].status == Status.Open);
 	}
 
 	function withdraw (uint value) public {
 		require(accounts[msg.sender].status == Status.Open);
-		require(accounts[msg.sender].bal >= value);
+		require(accounts[msg.sender].balance >= value);
 
 		assert(accounts[msg.sender].status == Status.Open);
 
 		// spec var
-        uint old_balance = accounts[msg.sender].bal;
+    uint old_balance = accounts[msg.sender].balance;
 
-        require(accounts[msg.sender].bal >= accounts[msg.sender].bal - value);
+    require(accounts[msg.sender].balance >= accounts[msg.sender].balance - value);
 
-		accounts[msg.sender].bal = accounts[msg.sender].bal - value;
+		Account storage account_stor = accounts[msg.sender];
+    Account memory account_mem = account_stor;
+    account_mem.balance = account_mem.balance - value;
+    accounts[msg.sender] = account_mem;
 		msg.sender.transfer(value);
 
-		// Verification.CexPrintui(old_balance);
-        // Verification.CexPrintui(value);
-        // Verification.CexPrintui(accounts[msg.sender].bal);
-
 		assert(old_balance >= old_balance - value);
-        assert(accounts[msg.sender].bal == old_balance - value);
+        assert(accounts[msg.sender].balance == old_balance - value);
         assert(accounts[msg.sender].status == Status.Open);
 	}
 }
